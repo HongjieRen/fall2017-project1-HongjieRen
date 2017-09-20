@@ -297,6 +297,7 @@ From the plot we can see, compared to the inauguration speech, Bush's conveyed l
 
 ###### let's see Obama's speeches
 ```{r, warning=FALSE}
+par(mfrow=c(2,1),mar=c(4, 6, 2, 1))
 emo.means=colMeans(sentence.list%>%filter(File=="BarackObama",type=="inaug")%>%select(anger:trust)>0.01)
 col.use=c("red2", "darkgoldenrod1", 
             "chartreuse3", "blueviolet",
