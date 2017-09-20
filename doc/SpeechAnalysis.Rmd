@@ -113,7 +113,7 @@ sel.comparison=c(farewell.list$File)
 ```
 
 
-First, let's see the sentences length in **Inaugural speeches**
+#####First, let's see the sentences length in **Inaugural speeches**
 ```{r, warning=FALSE}
 # remove the long sentences to better see the distribution(more than 80 words)
 sentence.list.sel=sentence.list%>%filter(type=="inaug", File%in%sel.comparison, Term==1, word.count<=80) 
@@ -143,7 +143,7 @@ From the plot we can get an interesting finding:
 
 ###### This is partly due to the face that people are more used to communicating with shorter sentences and living a life with faster pace today, thanks to the Internet and emoji. 
 
-Now let's take a look at **farewell speech**
+#####Now let's take a look at **farewell speech**
 ```{r, warning=FALSE }
 sentence.list.sel=sentence.list%>%filter(type=="farewell", File%in%sel.comparison, Term==1,word.count<=80) # remove the extreme long sentences(more than 80 words)
 sentence.list.sel$File=factor(sentence.list.sel$File)
@@ -168,7 +168,7 @@ The trend seems to be very similar.
 
 #### What's the difference for individual president?
 
-Let's see what's the difference in GeorgeWBush's inauguration speech and farewell speech:
+#####Let's see what's the difference in GeorgeWBush's inauguration speech and farewell speech:
 
 ```{r,warning=FALSE}
 words <- sentence.list%>%  filter(File=="GeorgeWBush")
@@ -202,7 +202,7 @@ Now let's go deeper.
 
 why did he change? What short sentences did he say?
 
-Let's have a peek of those sentences(equal and less than 3 words):
+#####Let's have a peek of those sentences(equal and less than 3 words):
 ```{r,warning=FALSE}
 sentence.list%>%
   filter(File=="BarackObama", 
@@ -221,6 +221,7 @@ Now we can guess what happened and what was the president Obama thinking when he
 ###### 3. "Hang on" part, Obama used lot of encouraging words to the public. It reminds me that back to that time point, a large amount of americans couldn't accept that Trump will be their leader for the next four years. Obama really cares about people! 
 
 ### Sentiment analysis
+#####Let's see the sentiment plot of these two presidents:
 ```{r,warning=FALSE}
 par(mfrow=c(2,1), mar=c(1,0,2,0), bty="n", xaxt="n", yaxt="n", font.main=1)
 
@@ -237,93 +238,82 @@ f.plotsent.len(In.list=sentence.list, InFile="BarackObama",
                InType="farewell", InTerm = 1, President="Barack Obama")
 ```
 
-# Emotionally charged sentences
-```{r}
+##### And let's see the emotionally charged sentences
+```{r, warning=FALSE}
 print("Barack Obama Inauguration")
 speech.df=tbl_df(sentence.list)%>%
   filter(File=="BarackObama", type=="inaug", Term==1, word.count>=5)%>%
   select(sentences, anger:trust)
 speech.df=as.data.frame(speech.df)
-as.character(speech.df$sentences[apply(speech.df[,-1], 2, which.max)])
+unique(as.character(speech.df$sentences[apply(speech.df[,-1], 2, which.max)]))
 
 print("Barack Obama Farewell")
 speech.df=tbl_df(sentence.list)%>%
   filter(File=="BarackObama", type=="farewell", Term==1, word.count>=5)%>%
   select(sentences, anger:trust)
 speech.df=as.data.frame(speech.df)
-as.character(speech.df$sentences[apply(speech.df[,-1], 2, which.max)])
+unique(as.character(speech.df$sentences[apply(speech.df[,-1], 2, which.max)]))
 
 print("George W Bush Inauguration")
 speech.df=tbl_df(sentence.list)%>%
   filter(File=="GeorgeWBush", type=="inaug", Term==1, word.count>=5)%>%
   select(sentences, anger:trust)
 speech.df=as.data.frame(speech.df)
-as.character(speech.df$sentences[apply(speech.df[,-1], 2, which.max)])
+unique(as.character(speech.df$sentences[apply(speech.df[,-1], 2, which.max)]))
 
 print("George W Bush Farewell")
 speech.df=tbl_df(sentence.list)%>%
   filter(File=="GeorgeWBush", type=="farewell", Term==1, word.count>=5)%>%
   select(sentences, anger:trust)
 speech.df=as.data.frame(speech.df)
-as.character(speech.df$sentences[apply(speech.df[,-1], 2, which.max)])
+unique(as.character(speech.df$sentences[apply(speech.df[,-1], 2, which.max)]))
 
 ```
 
-# Clustering of emotions
-```{r}
-heatmap.2(cor(sentence.list%>%filter(type=="inaug",File=="BarackObama")%>%select(anger:trust)), 
-          scale = "none", 
-          col = bluered(100), , margin=c(6, 6), key=F,
-          trace = "none", density.info = "none")
+By glancing these sentences, we do feel something, right?
 
-par(mar=c(4, 6, 2, 1))
-emo.means=colMeans(select(sentence.list, anger:trust)>0.01)
+That's the power of language.
+###### Now let's see a more interesting problem:
+###### What's the emotion distribution of Bush's and Obama's Speech?
+```{r, warning=FALSE}
+par(mfrow=c(2,1),mar=c(4, 6, 2, 1))
+# Bush's speeches
+emo.means=colMeans(sentence.list%>%filter(File=="GeorgeWBush",type=="inaug")%>%select(anger:trust)>0.01)
+col.use=c("red2", "darkgoldenrod1", 
+            "chartreuse3", "blueviolet",
+            "darkgoldenrod2", "dodgerblue3", 
+            "darkgoldenrod1", "darkgoldenrod1")
+barplot(emo.means[order(emo.means)], las=2, col=col.use[order(emo.means)], horiz=T, main="Bush's Inaugural Speeches")
+
+emo.means=colMeans(sentence.list%>%filter(File=="GeorgeWBush",type=="farewell")%>%select(anger:trust)>0.01)
+col.use=c("red2", "darkgoldenrod1", 
+            "chartreuse3", "blueviolet",
+            "darkgoldenrod2", "dodgerblue3", 
+            "darkgoldenrod1", "darkgoldenrod1")
+barplot(emo.means[order(emo.means)], las=2, col=col.use[order(emo.means)], horiz=T, main="Bush's Farewell Speeches")
+```
+
+From the plot we can see, compared to the inauguration speech, Bush's conveyed less joy in the farewell speech, which is normal for most president; surprisingly, he also showed less anger in the farewell speech, maybe retiring is also a relief for him. Overall, Bush conveyed a large percent of positive emotions.
+
+###### let's see Obama's speeches
+```{r, warning=FALSE}
+emo.means=colMeans(sentence.list%>%filter(File=="BarackObama",type=="inaug")%>%select(anger:trust)>0.01)
 col.use=c("red2", "darkgoldenrod1", 
             "chartreuse3", "blueviolet",
             "darkgoldenrod2", "dodgerblue3", 
             "darkgoldenrod1", "darkgoldenrod1")
 barplot(emo.means[order(emo.means)], las=2, col=col.use[order(emo.means)], horiz=T, main="Obama's Inaugural Speeches")
 
-
-heatmap.2(cor(sentence.list%>%filter(type=="farewell",File=="BarackObama")%>%select(anger:trust)),          scale = "none", 
-          col = bluered(100), , margin=c(6, 6), key=F,
-          trace = "none", density.info = "none")
-
-par(mar=c(4, 6, 2, 1))
-emo.means=colMeans(select(sentence.list, anger:trust)>0.01)
+emo.means=colMeans(sentence.list%>%filter(File=="BarackObama",type=="farewell")%>%select(anger:trust)>0.01)
 col.use=c("red2", "darkgoldenrod1", 
             "chartreuse3", "blueviolet",
             "darkgoldenrod2", "dodgerblue3", 
             "darkgoldenrod1", "darkgoldenrod1")
 barplot(emo.means[order(emo.means)], las=2, col=col.use[order(emo.means)], horiz=T, main="Obama's Farewell Speeches")
+
 ```
 
+Obama's farewell speech conveyed more anger and less fear to the audience, maybe it's mainly due to the trump's election result. Overall, Obama's speech conveyed a larger amount of negative emotions in the speech. This gives a hint:
+###### a good public speaker kmows how to resonate with audience by conveying multiple emotions.
 
-```{r}
-presid.summary=tbl_df(sentence.list)%>%
-  filter(type=="inaug", File%in%sel.comparison)%>%
-  #group_by(paste0(type, File))%>%
-  group_by(File)%>%
-  summarise(
-    anger=mean(anger),
-    anticipation=mean(anticipation),
-    disgust=mean(disgust),
-    fear=mean(fear),
-    joy=mean(joy),
-    sadness=mean(sadness),
-    surprise=mean(surprise),
-    trust=mean(trust)
-    #negative=mean(negative),
-    #positive=mean(positive)
-  )
-
-presid.summary=as.data.frame(presid.summary)
-rownames(presid.summary)=as.character((presid.summary[,1]))
-km.res=kmeans(presid.summary[,-1], iter.max=200,
-              5)
-fviz_cluster(km.res, 
-             stand=F, repel= TRUE,
-             data = presid.summary[,-1], xlab="", xaxt="n",
-             show.clust.cent=FALSE)
-```
-
+### In a word, there do exist some changes in the inauguration speech and farewell speech, though not obvious, the words one president chooses do betray him.
